@@ -1,11 +1,13 @@
 import React from 'react';
-import Test from './components/Test';
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import Timeline from './components/Timeline';
 
 function App() {
   return (
-    <div className="App">
-      <Test />
-    </div>
+    <DndProvider backend={HTML5Backend}>
+      <Timeline />
+    </DndProvider>
   );
 }
 
