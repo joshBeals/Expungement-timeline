@@ -1,32 +1,72 @@
 /* Scrollable Wrapper */
 .timeline-scroll-container {
     overflow-x: auto; /* Enable horizontal scrolling */
-    border: 1px solid #ddd;
-    padding: 10px 0;
+    border-top: 1px solid #ddd;
+    border-left: 1px solid #ddd;
+    border-radius: 5px;
+    /* padding: 10px 0px; */
     margin-bottom: 20px;
     white-space: nowrap; /* Prevent wrapping of grid elements */
+    scrollbar-width: thin;
+    scrollbar-color: #b0b0b0 #f1f1f1; /* Thumb color & track color */
   }
+
+  /* Thin horizontal scrollbar for Webkit browsers (Chrome, Edge, Safari) */
+.timeline-scroll-container::-webkit-scrollbar {
+    height: 6px; /* Adjust height to make it thinner */
+  }
+  
+  .timeline-scroll-container::-webkit-scrollbar-thumb {
+    background: #b0b0b0; /* Light gray thumb */
+    border-radius: 6px; /* Rounded edges */
+  }
+  
+  .timeline-scroll-container::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Light background */
+  }
+  
   
   /* Grid Container */
   .timeline-grid {
     display: grid;
-    border: 1px solid #ddd;
+    /* border: 1px solid #ddd; */
+  }
+  
+  /* Ensure Grid Lines Show Everywhere */
+  .timeline-grid > div {
+    border: 1px solid #ddd; /* Add borders to every grid cell */
   }
   
   /* Header Row */
   .grid-header {
     display: contents; /* Allow header to align within the grid */
   }
-  
-  .grid-row-label {
+
+
+
+.grid-column-header {
     text-align: center;
-    border-right: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 10px 0;
+    /* border: 1px solid #ddd; */
     font-weight: bold;
     background: #f8f9fa;
   }
+  
+  /* Row Labels (Event Titles) */
+.grid-row-label {
+    text-align: center;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    background: #f8f9fa;
+    color: #374151;
+    font-family: 'Poppins', sans-serif;
+    padding: 5px;
+  }
+  
   
   .grid-column-header {
     text-align: center;
@@ -38,19 +78,22 @@
   }
   
   /* Event Card */
-  .event-card {
+.event-card {
+    margin: 10px 0px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: lightblue;
-    border: 1px solid #007bff;
+    /* background-color: lightblue; */
+    /* border: 1px solid #007bff; */
     border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: relative;
+    transition: width 0.1s ease-out; /* Smooth width adjustment */
+    overflow: hidden;
+    z-index: 1;
   }
   
   .event-card.dragging {
-    opacity: 0.5;
+    opacity: 0.2;
   }
   
   .event-content {
@@ -62,20 +105,29 @@
     position: relative;
   }
   
-  /* Resize Handles */
-  .resize-handle {
+ /* Resize Handles */
+.resize-handle {
     height: 100%;
     width: 10px;
-    background-color: gray;
+    background-color: rgba(0, 0, 0, 0); /* Subtle visibility */
     cursor: col-resize;
     position: absolute;
+    z-index: 2;
+    transition: background-color 0.2s ease-in-out; /* Smooth color change */
   }
   
   .resize-handle.left {
     left: 0;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
   }
   
   .resize-handle.right {
     right: 0;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
   }
   
+  .resize-handle:hover {
+    background-color: rgba(0, 0, 0, 0); /* Highlight on hover */
+  }

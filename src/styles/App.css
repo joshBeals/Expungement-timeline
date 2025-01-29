@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Apply Poppins globally */
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fa; /* Optional: Light background */
+  color: #374151; /* Optional: Dark text */
+}
+
+/* Ensure all text elements use Poppins */
+h1, h2, h3, h4, h5, h6, p, span, div, button {
+  font-family: 'Poppins', sans-serif !important;
+}
