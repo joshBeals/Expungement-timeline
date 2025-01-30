@@ -8,15 +8,44 @@ const AppStateContext = createContext();
 
 export const AppStateProvider = ({ children }) => {
 
-  const [showForm, setShowForm] = useState(false);
+    const [showForm, setShowForm] = useState(false);
+    
+    const [scenarios, setScenarios] = useState(() => {
+        const savedScenarios = localStorage.getItem('scenarios');
+        return savedScenarios ? JSON.parse(savedScenarios) : [];
+    });
 
-  // Value to be passed to consuming components
-  const value = {
-    showForm,
-    setShowForm,
-  };
+    const [showResult, setShowResult] = useState(false);
+    const [interpretation, setInterpretation] = useState('');
 
-  return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
+    useEffect(() => {
+        localStorage.setItem('scenarios', JSON.stringify(scenarios));
+    }, [scenarios]);
+
+
+    const addScenario = (scenario) => {
+        setScenarios([...scenarios, scenario]);
+    };
+
+    const deleteScenario = (index) => {
+        const filteredRanges = scenarios.filter((_, idx) => idx !== index);
+        setScenarios(filteredRanges);
+    };
+
+    // Value to be passed to consuming components
+    const value = {
+        showForm,
+        setShowForm,
+        scenarios,
+        addScenario,
+        deleteScenario,
+        showResult,
+        setShowResult,
+        interpretation,
+        setInterpretation,
+    };
+
+    return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
 };
 
 export const useAppState = () => useContext(AppStateContext);

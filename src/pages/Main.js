@@ -6,6 +6,7 @@ import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import { useAppState } from '../store/AppStateContext';
+import ScenarioForm from '../components/ScenarioForm';
 
 function Main() {
     const { showForm, setShowForm } = useAppState();
@@ -38,14 +39,13 @@ function Main() {
             <Offcanvas
                 show={showForm}
                 onHide={handleClose}
-                placement="top"
+                placement="end"
             >
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Offcanvas</Offcanvas.Title>
                 </Offcanvas.Header>
                 <Offcanvas.Body>
-                    Some text as placeholder. In real life you can have the elements you
-                    have chosen. Like, text, images, lists, etc.
+                   <ScenarioForm />
                 </Offcanvas.Body>
             </Offcanvas>
         

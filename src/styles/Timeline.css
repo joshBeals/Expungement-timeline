@@ -3,6 +3,7 @@
     overflow-x: auto; /* Enable horizontal scrolling */
     border-top: 1px solid #ddd;
     border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
     border-radius: 5px;
     /* padding: 10px 0px; */
     margin-bottom: 20px;
@@ -40,16 +41,6 @@
   /* Header Row */
   .grid-header {
     display: contents; /* Allow header to align within the grid */
-  }
-
-
-
-.grid-column-header {
-    text-align: center;
-    padding: 10px 0;
-    /* border: 1px solid #ddd; */
-    font-weight: bold;
-    background: #f8f9fa;
   }
   
   /* Row Labels (Event Titles) */
