@@ -4,14 +4,15 @@
  * github.com/joshBeals
  */
 import React, { createContext, useContext, useEffect, useState } from 'react';
+
 const AppStateContext = createContext();
 
 export const AppStateProvider = ({ children }) => {
 
     const [showForm, setShowForm] = useState(false);
     
-    const [scenarios, setScenarios] = useState(() => {
-        const savedScenarios = localStorage.getItem('scenarios');
+    const [allscenarios, setAllScenarios] = useState(() => {
+        const savedScenarios = localStorage.getItem('allscenarios');
         return savedScenarios ? JSON.parse(savedScenarios) : [];
     });
 
@@ -19,25 +20,35 @@ export const AppStateProvider = ({ children }) => {
     const [interpretation, setInterpretation] = useState('');
 
     useEffect(() => {
-        localStorage.setItem('scenarios', JSON.stringify(scenarios));
-    }, [scenarios]);
+        localStorage.setItem('allscenarios', JSON.stringify(allscenarios));
+    }, [allscenarios]);
 
-
+    /** ✅ `addScenario` updates an existing scenario instead of adding a new one */
     const addScenario = (scenario) => {
-        setScenarios([...scenarios, scenario]);
+        setAllScenarios([...allscenarios, scenario]);
     };
 
-    const deleteScenario = (index) => {
-        const filteredRanges = scenarios.filter((_, idx) => idx !== index);
-        setScenarios(filteredRanges);
+    /** ✅ `editScenario` updates an existing scenario instead of adding a new one */
+    const editScenario = (updatedScenario) => {
+        setAllScenarios((prevScenarios) =>
+            prevScenarios.map((scenario) =>
+                scenario.id === updatedScenario.id ? updatedScenario : scenario
+            )
+        );
+    };
+
+    /** ✅ `deleteScenario` removes a scenario by its unique `id` */
+    const deleteScenario = (id) => {
+        setAllScenarios((prevScenarios) => prevScenarios.filter((scenario) => scenario.id !== id));
     };
 
     // Value to be passed to consuming components
     const value = {
         showForm,
         setShowForm,
-        scenarios,
+        allscenarios,
         addScenario,
+        editScenario, // Replaces `addScenario`
         deleteScenario,
         showResult,
         setShowResult,

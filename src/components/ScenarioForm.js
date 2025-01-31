@@ -1,298 +1,250 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 import generateYearRange from '../helpers/generateYearRange';
-import capitalizeFirst from '../helpers/capitalizeFirst';
 import { useAppState } from '../store/AppStateContext';
 
-const ScenarioForm = () => {
-
-    const [types, setTypes] = useState([
-        "Felony",
-        "Misdemeanor"
-    ]);
-    const [convictionType, setConvictionType] = useState('');
+const ScenarioForm = ({ scenario = null }) => {
+    const [convictionType, setConvictionType] = useState(scenario?.type || '');
     const currentYear = new Date().getFullYear();
-    const years = generateYearRange(1960, currentYear);
-    years.sort((a, b) => b - a);
-    const [selectedYear, setSelectedYear] = useState('');
-    const [startYear, setStartYear] = useState('');
-    const [endYear, setEndYear] = useState('');
-    const [isChecked, setIsChecked] = useState(false);
-    const [isChecked1, setIsChecked1] = useState(false);
-    const [isChecked2, setIsChecked2] = useState(false);
-    const [alreadyExpunged, setAlreadyExpunged] = useState(false);
-    const [yearType, setYearType] = useState('');
-    const [question, setQuestion] = useState('');
-    
-    const { addScenario, scenarios } = useAppState();
+    const years = generateYearRange(1960, currentYear).sort((a, b) => b - a);
+    const [selectedYear, setSelectedYear] = useState(scenario?.startYear || '');
+    const [startYear, setStartYear] = useState(scenario?.startYear || '');
+    const [endYear, setEndYear] = useState(scenario?.endYear || '');
+    const [isChecked, setIsChecked] = useState(scenario?.assaultive || false);
+    const [isChecked1, setIsChecked1] = useState(scenario?.tenner || false);
+    const [isChecked2, setIsChecked2] = useState(scenario?.owi || false);
+    const [alreadyExpunged, setAlreadyExpunged] = useState(scenario?.alreadyExpunged || false);
+    const [yearType, setYearType] = useState(scenario?.yearType || '');
+    const [question, setQuestion] = useState(scenario?.question || '');
 
-    const handleConvictionTypeChange = (event) => {
-        setConvictionType(event.target.value);  
-    };
+    const { addScenario, editScenario, setShowForm } = useAppState();
 
-    const handleYearChange = (event) => {
-        setSelectedYear(event.target.value); 
-    };
+    const handleSingle = (value) => {
+        setSelectedYear(value);
+        setStartYear(value);
+        setEndYear(value);
+    }
 
-    const handleStartYearChange = (event) => {
-        setStartYear(event.target.value); 
-    };
-
-    const handleEndYearChange = (event) => {
-        setEndYear(event.target.value); 
-    };
-
-    const handleCheckboxChange = (event) => {
-        setIsChecked(event.target.checked);
-    };
-
-    const handleCheckboxChange1 = (event) => {
-        setIsChecked1(event.target.checked);
-    };
-
-    const handleCheckboxChange2 = (event) => {
-        setIsChecked2(event.target.checked);
-    };
-
-    const handleYearTypeChange = (event) => {
-        setYearType(event.target.value);
-    };
-
-    const handleAlreadyExpungedChange = (event) => {
-        const value = event.target.value === "true"; // Ensure boolean conversion
-        setAlreadyExpunged(value);
-    };
-
-    const handleQuestion = (event) => {
-        setQuestion(event.target.value);
-    };
-
-    const handleAdd = () => {
+    const handleSubmit = () => {
         let error = false;
-        let errorMessage = "";
+        let errorMessage = '';
 
-        if (yearType == 'range') {
-            if (startYear == '' || endYear == '') {
-                error = true;
-                errorMessage = "Please pick date range!";
-            }
-            if ((parseInt(endYear, 10) < parseInt(startYear, 10))) {
-                error = true;
-                errorMessage = "End year has to be greater than Start year";
-            }
-        }
-        
-        if (yearType == 'single' && selectedYear == '') {
+        if (yearType === 'range' && (!startYear || !endYear || parseInt(endYear, 10) < parseInt(startYear, 10))) {
             error = true;
-            errorMessage = "Please pick a year!";
+            errorMessage = 'Please enter a valid date range!';
+        }
+        if (yearType === 'single' && !selectedYear) {
+            error = true;
+            errorMessage = 'Please pick a year!';
         }
 
-        if (!error) {
-            const count = scenarios.length;
-            const result = { id: count, type: convictionType, yearType: yearType, year: selectedYear, startYear: startYear, endYear: endYear, assaultive: isChecked, tenner: isChecked1, owi: isChecked2, question: question };
-            addScenario(result);
-            setConvictionType('');
-            setSelectedYear('');
-            setEndYear('');
-            setStartYear('');
-            setYearType('');
-            setQuestion('');
-            setIsChecked(false);
-            setIsChecked1(false);
-            setIsChecked2(false);
-        } else {
+        if (error) {
             alert(errorMessage);
+            return;
         }
+
+        const newScenario = {
+            id: scenario?.id || Date.now(),
+            type: convictionType,
+            yearType,
+            startYear,
+            endYear,
+            assaultive: isChecked,
+            tenner: isChecked1,
+            owi: isChecked2,
+            alreadyExpunged,
+            question
+        };
+
+        if (scenario) {
+            editScenario(newScenario);
+        } else {
+            addScenario(newScenario);
+        }
+
+        setShowForm(false);
     };
 
     return (
-        <>
         <Card className="mb-3">
-            <Card.Header>Add Event</Card.Header>
+            <Card.Header>{scenario ? 'Edit Scenario' : 'Add Scenario'}</Card.Header>
             <Card.Body>
-                <Form className='mb-3'>
-                    
+                <Form>
                     <Alert variant="primary">
-                        You can leave certain things unpecified by picking the "Leave Unspecified" option.
+                        You can leave certain things unspecified by selecting "Leave Unspecified."
                     </Alert>
-                    <Row className="">
+
+                    <Row>
                         <Col xs={12}>
-                            <Row>
-                                <Col xs={12}>
-                                    <Form.Label className='fw-bolder'>Select Conviction Type</Form.Label>
-                                    <Form.Select value={convictionType} onChange={handleConvictionTypeChange}>
-                                        <option value="">Leave Unspecified</option>
-                                        {types?.map((type, index) => (
-                                            <option key={index} value={type}>{type}</option>
-                                        ))}
-                                    </Form.Select>
+                            <Form.Label className="fw-bolder">Select Conviction Type</Form.Label>
+                            <Form.Select value={convictionType} onChange={(e) => setConvictionType(e.target.value)}>
+                                <option value="">Leave Unspecified</option>
+                                <option value="Felony">Felony</option>
+                                <option value="Misdemeanor">Misdemeanor</option>
+                            </Form.Select>
+                        </Col>
+
+                        {convictionType && (
+                            <>
+                                <Col className="mt-2">
+                                    <Form.Check
+                                        type="checkbox"
+                                        label="Assaultive"
+                                        checked={isChecked}
+                                        onChange={(e) => setIsChecked(e.target.checked)}
+                                    />
                                 </Col>
-                                {convictionType.toLowerCase() !== '' && (
-                                    <Col xs={3} className="mt-2">
+                                {convictionType === 'Felony' && (
+                                    <Col className="mt-2">
                                         <Form.Check
                                             type="checkbox"
-                                            label="Assaultive"
-                                            checked={isChecked}
-                                            onChange={handleCheckboxChange}
-                                        />
-                                    </Col>
-                                )}
-                                {convictionType.toLowerCase() === 'felony' && (
-                                    <Col xs={3} className="mt-2">
-                                        <Form.Check
-                                            type="checkbox"
-                                            label="TenYearFelony"
+                                            label="Ten Year Felony"
                                             checked={isChecked1}
-                                            onChange={handleCheckboxChange1}
+                                            onChange={(e) => setIsChecked1(e.target.checked)}
                                         />
                                     </Col>
                                 )}
-                                {convictionType.toLowerCase() === 'misdemeanor' && (
-                                    <Col xs={3} className="mt-2">
+                                {convictionType === 'Misdemeanor' && (
+                                    <Col className="mt-2">
                                         <Form.Check
                                             type="checkbox"
                                             label="OWI"
                                             checked={isChecked2}
-                                            onChange={handleCheckboxChange2}
+                                            onChange={(e) => setIsChecked2(e.target.checked)}
                                         />
                                     </Col>
                                 )}
-                            </Row>
-                        </Col>
-                        
-                        <Col xs={12} className='mt-3'>
-                            <Form.Label className='fw-bolder'>When did this conviction occur?</Form.Label>
-                            <div className="mb-3">
-                                <Form.Check
-                                    inline
-                                    label="Single Year"
-                                    name="group1"
-                                    type="radio"
-                                    id="radio1"
-                                    value="single"
-                                    checked={yearType === 'single'}
-                                    onChange={handleYearTypeChange}
-                                />
-                                <Form.Check
-                                    inline
-                                    label="Date Range"
-                                    name="group1"
-                                    type="radio"
-                                    id="radio2"
-                                    value="range"
-                                    checked={yearType === 'range'}
-                                    onChange={handleYearTypeChange}
-                                />
-                                <Form.Check
-                                    inline
-                                    label="Leave Unspecified"
-                                    name="group1"
-                                    type="radio"
-                                    id="radio3"
-                                    value=""
-                                    checked={yearType === ''}
-                                    onChange={handleYearTypeChange}
-                                />
-                            </div>
-                            {yearType == 'single' && <Form.Select xs={6} value={selectedYear} onChange={handleYearChange}>
-                                <option value="">Select Year</option>
-                                {years.map(year => (
-                                    <option key={year} value={year}>{year}</option>
-                                ))}
-                            </Form.Select>}
-                                
-                            {yearType == 'range' && <Row>
-                                <Col xs={6}>
-                                    <Form.Select value={startYear} onChange={handleStartYearChange}>
-                                        <option value="">Between</option>
-                                        {years.map(year => (
-                                            <option key={year} value={year}>{year}</option>
-                                        ))}
-                                    </Form.Select>
-                                </Col>
-                                <Col xs={6}>
-                                    <Form.Select value={endYear} onChange={handleEndYearChange}>
-                                        <option value="">And</option>
-                                        {years.map(year => (
-                                            <option key={year} value={year}>{year}</option>
-                                        ))}
-                                    </Form.Select>
-                                </Col>
-                            </Row>}
-                            
-                        </Col>
-
-                        <Col xs={12} className='mt-3'>
-                            <Form.Label className='fw-bolder'>Has this conviction been expunged in the past?</Form.Label>
-                            <div className="mb-3">
-                                <Form.Check
-                                    inline
-                                    label="Yes"
-                                    name="group3"
-                                    type="radio"
-                                    id="alreadyExpungedYes"
-                                    value="true"
-                                    checked={alreadyExpunged === true}
-                                    onChange={(e) => handleAlreadyExpungedChange(e)}
-                                />
-                                <Form.Check
-                                    inline
-                                    label="No"
-                                    name="group3"
-                                    type="radio"
-                                    id="alreadyExpungedNo"
-                                    value="false"
-                                    checked={alreadyExpunged === false}
-                                    onChange={(e) => handleAlreadyExpungedChange(e)}
-                                />
-                            </div>
-                        </Col>
-
-                        <Col xs={12} className='mt-3'>
-                            <Form.Label className='fw-bolder'>What do you want to know about this conviction?</Form.Label>
-                            <div className="mb-3">
-                                <Form.Check
-                                    inline
-                                    label="Expungeable?"
-                                    name="group2"
-                                    type="radio"
-                                    id="question1"
-                                    value="expungeable"
-                                    checked={question === 'expungeable'}
-                                    onChange={handleQuestion}
-                                />
-                                <Form.Check
-                                    inline
-                                    label="Unexpungeable?"
-                                    name="group2"
-                                    type="radio"
-                                    id="question1"
-                                    value="unexpungeable"
-                                    checked={question === 'unexpungeable'}
-                                    onChange={handleQuestion}
-                                />
-                                <Form.Check
-                                    inline
-                                    label="I'm not sure!"
-                                    name="group2"
-                                    type="radio"
-                                    id="question1"
-                                    value=""
-                                    checked={question === ''}
-                                    onChange={handleQuestion}
-                                />
-                            </div>
-                            
-                        </Col>
-                            
-                        <Col xs={12} className='mt-3'>
-                            <Button onClick={handleAdd} variant="primary" className="w-100"> Add </Button>
-                        </Col>
+                            </>
+                        )}
                     </Row>
+
+                    <Col xs={12} className="mt-3">
+                        <Form.Label className="fw-bolder">When did this conviction occur?</Form.Label>
+                        <div className="mb-3">
+                            <Form.Check
+                                inline
+                                label="Single Year"
+                                type="radio"
+                                value="single"
+                                checked={yearType === 'single'}
+                                onChange={(e) => setYearType(e.target.value)}
+                            />
+                            <Form.Check
+                                inline
+                                label="Date Range"
+                                type="radio"
+                                value="range"
+                                checked={yearType === 'range'}
+                                onChange={(e) => setYearType(e.target.value)}
+                            />
+                            <Form.Check
+                                inline
+                                label="Leave Unspecified"
+                                type="radio"
+                                value=""
+                                checked={yearType === ''}
+                                onChange={(e) => setYearType(e.target.value)}
+                            />
+                        </div>
+
+                        {yearType === 'single' && (
+                            <Form.Select value={selectedYear} onChange={(e) => handleSingle(e.target.value)}>
+                                <option value="">Select Year</option>
+                                {years.map((year) => (
+                                    <option key={year} value={year}>
+                                        {year}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        )}
+
+                        {yearType === 'range' && (
+                            <Row>
+                                <Col xs={6}>
+                                    <Form.Select value={startYear} onChange={(e) => setStartYear(e.target.value)}>
+                                        <option value="">Start Year</option>
+                                        {years.map((year) => (
+                                            <option key={year} value={year}>
+                                                {year}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                </Col>
+                                <Col xs={6}>
+                                    <Form.Select value={endYear} onChange={(e) => setEndYear(e.target.value)}>
+                                        <option value="">End Year</option>
+                                        {years.map((year) => (
+                                            <option key={year} value={year}>
+                                                {year}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                </Col>
+                            </Row>
+                        )}
+                    </Col>
+
+                    <Col xs={12} className="mt-3">
+                        <Form.Label className="fw-bolder">Has this conviction been expunged?</Form.Label>
+                        <div className="mb-3">
+                            <Form.Check
+                                inline
+                                label="Yes"
+                                type="radio"
+                                value="true"
+                                checked={alreadyExpunged === true}
+                                onChange={() => setAlreadyExpunged(true)}
+                            />
+                            <Form.Check
+                                inline
+                                label="No"
+                                type="radio"
+                                value="false"
+                                checked={alreadyExpunged === false}
+                                onChange={() => setAlreadyExpunged(false)}
+                            />
+                        </div>
+                    </Col>
+
+                    <Col xs={12} className="mt-3">
+                        <Form.Label className="fw-bolder">What do you want to know about this conviction?</Form.Label>
+                        <div className="mb-3">
+                            <Form.Check
+                                inline
+                                label="Expungeable?"
+                                type="radio"
+                                value="expungeable"
+                                checked={question === 'expungeable'}
+                                onChange={(e) => setQuestion(e.target.value)}
+                            />
+                            <Form.Check
+                                inline
+                                label="Unexpungeable?"
+                                type="radio"
+                                value="unexpungeable"
+                                checked={question === 'unexpungeable'}
+                                onChange={(e) => setQuestion(e.target.value)}
+                            />
+                            <Form.Check
+                                inline
+                                label="I'm not sure!"
+                                type="radio"
+                                id="question1"
+                                value=""
+                                checked={question === ''}
+                                onChange={(e) => setQuestion(e.target.value)}
+                            />
+                        </div>
+                    </Col>
+
+                    <Col xs={12} className="mt-3">
+                        <Button onClick={handleSubmit} variant="primary" className="w-100">
+                            {scenario ? 'Update' : 'Add'}
+                        </Button>
+                    </Col>
                 </Form>
             </Card.Body>
         </Card>
-        </>
     );
 };
 

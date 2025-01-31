@@ -1,29 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDrop } from "react-dnd";
 import EventCard from "./EventCard";
 import "../styles/Timeline.css";
+import { useAppState } from "../store/AppStateContext";
+import { Button } from "react-bootstrap";
 
-function Timeline() {
+function Timeline({ onEditScenario }) {
   const years = Array.from({ length: 20 }, (_, i) => 2005 + i); // Years from 2005-2025
-  const [events, setEvents] = useState([
-    { id: 1, name: "Event 1", startYear: 2016, endYear: 2019 },
-    { id: 2, name: "Event 2", startYear: 2021, endYear: 2021 },
-    { id: 3, name: "Event 3", startYear: 2015, endYear: 2017 },
-  ]);
+  const { allscenarios, addScenario, editScenario } = useAppState(); // Get allscenarios, addScenario and editScenario
 
+  // Initialize events from allscenarios
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    if (allscenarios && allscenarios.length > 0) {
+      const mappedEvents = allscenarios.map((scenario, index) => {
+
+        return {
+          id: scenario.id ?? index,
+          name: scenario.type || `Conviction`,
+          startYear: parseInt(scenario.startYear) || 2005,
+          endYear: parseInt(scenario.endYear) || 2005,
+        };
+      });
+
+      setEvents(mappedEvents);
+    }
+  }, [allscenarios]); // Updates when allscenarios changes
+
+  /** Update `allscenarios` when resizing an event */
   const handleCardResize = (id, newStart, newEnd) => {
     setEvents((prev) =>
       prev.map((event) =>
         event.id === id ? { ...event, startYear: newStart, endYear: newEnd } : event
       )
     );
+
+    // Find the scenario and update it
+    const updatedScenario = allscenarios.find((scenario) => scenario.id === id);
+    if (updatedScenario) {
+      editScenario({
+        ...updatedScenario,
+        startYear: newStart.toString(),
+        endYear: newEnd.toString(),
+      });
+    }
   };
 
+  /** Update `allscenarios` when moving an event */
   const handleCardMove = (id, newStartYear) => {
     setEvents((prev) =>
       prev.map((event) => {
         if (event.id === id) {
-          const duration = event.endYear - event.startYear; // Preserve event duration
+          const duration = event.endYear - event.startYear;
           return {
             ...event,
             startYear: newStartYear,
@@ -33,6 +62,16 @@ function Timeline() {
         return event;
       })
     );
+
+    // Find the scenario and update it
+    const updatedScenario = allscenarios.find((scenario) => scenario.id === id);
+    if (updatedScenario) {
+      editScenario({
+        ...updatedScenario,
+        startYear: newStartYear.toString(),
+        endYear: (newStartYear + (updatedScenario.endYear - updatedScenario.startYear)).toString(),
+      });
+    }
   };
 
   const [{ isOver }, dropRef] = useDrop({
@@ -53,20 +92,16 @@ function Timeline() {
 
   return (
     <div className="container-fluid">
-      {/* <h2 className="text-center mb-5">Conviction History Timeline</h2> */}
-
-      {/* Scrollable Wrapper */}
       <div className="timeline-scroll-container m-2">
-        {/* Grid Container */}
         <div
           className="timeline-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: `150px repeat(${years.length}, 100px)`, // First column for event titles
+            gridTemplateColumns: `150px repeat(${years.length}, 100px)`,
             gridTemplateRows: `50px repeat(${events.length}, 80px)`,
             width: `${150 + years.length * 100}px`,
           }}
-          ref={dropRef} // Attach drop ref
+          ref={dropRef}
         >
           {/* Timeline Header Row */}
           <div className="grid-header" style={{ gridColumn: `1 / span ${years.length + 1}` }}>
@@ -78,27 +113,38 @@ function Timeline() {
             ))}
           </div>
 
-          {/* Event Rows (Title + Event Bar) */}
+          {/* Event Rows */}
           {events.map((event, index) => (
             <React.Fragment key={event.id}>
-              {/* Row Title (Event Name) in the First Column */}
-              <div
-                className="grid-row-label"
-                style={{
-                  gridRow: index + 2, // Aligns with the correct row
-                  gridColumn: "1", // Stays in the first column
-                }}
-              >
-                {event.name}
+              <div className="grid-row-label" style={{ gridRow: index + 2, gridColumn: "1" }}>
+                <div>{event.name}</div>
+                {/* <div className="btnGroup">
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    className=""
+                    onClick={() => onEditScenario(event)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    className=""
+                    onClick={() => onEditScenario(event)}
+                  >
+                    Edit
+                  </Button>
+                </div> */}
               </div>
 
-              {/* Event Card */}
               <EventCard
                 event={event}
                 years={years}
                 onResize={handleCardResize}
                 onMove={handleCardMove}
                 row={index + 2}
+                action={onEditScenario}
               />
             </React.Fragment>
           ))}
