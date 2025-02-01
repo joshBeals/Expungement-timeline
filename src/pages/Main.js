@@ -26,9 +26,9 @@ function Main() {
         <DndProvider backend={HTML5Backend}>
             {/* Title Section */}
             <Alert variant="primary" className='m-3'>
-                <Alert.Heading>Expungement Sandbox</Alert.Heading>
+                <Alert.Heading>Expungement Analyser</Alert.Heading>
                 <p className='mt-3'>
-                    Welcome to the Expungement Sandbox. This interactive tool allows you to 
+                    Welcome to the Expungement Analyser. This interactive tool allows you to 
                     explore different conviction scenarios and determine their expungement eligibility. 
                     Add a conviction to the timeline, adjust its details, and analyze how the law 
                     applies in various situations.

@@ -66,9 +66,9 @@ const ScenarioForm = ({ scenario = null }) => {
     };
 
     return (
-        <Card className="mb-3">
-            <Card.Header>{scenario ? 'Edit Scenario' : 'Add Scenario'}</Card.Header>
-            <Card.Body>
+        // <Card className="mb-3">
+        //     <Card.Header>{scenario ? 'Edit Scenario' : 'Add Scenario'}</Card.Header>
+        //     <Card.Body>
                 <Form>
                     <Alert variant="primary">
                         You can leave certain things unspecified by selecting "Leave Unspecified."
@@ -243,8 +243,8 @@ const ScenarioForm = ({ scenario = null }) => {
                         </Button>
                     </Col>
                 </Form>
-            </Card.Body>
-        </Card>
+        //     </Card.Body>
+        // </Card>
     );
 };
 

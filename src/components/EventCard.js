@@ -93,10 +93,9 @@ function EventCard({ event, years, onResize, row, action }) {
                     opacity: isDragging || isResizing ? 0.8 : 1,
                     zIndex: isDragging || isResizing ? 3 : 1,
                 }}
-                onClick={handleShow} // Will not trigger when resizing
             >
                 <div className="event-content">
-                    <span>{event.name}</span>
+                    <span onClick={handleShow} >{event.name}</span>
 
                     {/* Left Resize Handle */}
                     <div
@@ -125,8 +124,8 @@ function EventCard({ event, years, onResize, row, action }) {
                 <Modal.Body>
                     {event ? (
                         <div>
-                            <p><strong>Type:</strong> {event.name || "Unspecified"}</p>
-                            <p><strong>Year:</strong> 
+                            <p><strong>Type: </strong> {event.name || "Unspecified"}</p>
+                            <p><strong>Year: </strong> 
                                 {`From ${event.startYear} to ${event.endYear}`}
                             </p>
                             <p><strong>Expunged Before? :</strong> {event.alreadyExpunged ? "Yes" : "No"}</p>
@@ -141,7 +140,7 @@ function EventCard({ event, years, onResize, row, action }) {
                                 </div>
                             )}
 
-                            <p><strong>Question:</strong> {event.question || "Not specified"}</p>
+                            <p><strong>Question: </strong> {event.question || "Not specified"}</p>
                         </div>
                     ) : (
                         <p>No event details available.</p>
