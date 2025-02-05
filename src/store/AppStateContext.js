@@ -19,6 +19,8 @@ export const AppStateProvider = ({ children }) => {
     const [showResult, setShowResult] = useState(false);
     const [interpretation, setInterpretation] = useState('');
 
+    const [connections, setConnections] = useState([]);
+
     useEffect(() => {
         localStorage.setItem('allscenarios', JSON.stringify(allscenarios));
     }, [allscenarios]);
@@ -42,18 +44,36 @@ export const AppStateProvider = ({ children }) => {
         setAllScenarios((prevScenarios) => prevScenarios.filter((scenario) => scenario.id !== id));
     };
 
+    /** ✅ Function to add a connection */
+    const addConnection = (fromId, toId) => {
+        setConnections((prev) => {
+            const newConnections = [...prev, { fromId, toId }];
+            console.log("📌 New Connection Added:", newConnections); // ✅ Debugging Log
+            return newConnections;
+        });
+    };
+    
+
+    /** ✅ Function to remove a connection */
+    const removeConnection = (fromId, toId) => {
+        setConnections((prev) => prev.filter((c) => !(c.fromId === fromId && c.toId === toId)));
+    };
+
     // Value to be passed to consuming components
     const value = {
         showForm,
         setShowForm,
         allscenarios,
         addScenario,
-        editScenario, // Replaces `addScenario`
+        editScenario,
         deleteScenario,
         showResult,
         setShowResult,
         interpretation,
         setInterpretation,
+        connections,
+        addConnection,
+        removeConnection,
     };
 
     return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

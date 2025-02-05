@@ -18,6 +18,7 @@ function Main() {
     };
 
     const handleShow = (scenario = null) => {
+        console.log(scenario);
         setSelectedScenario(scenario);
         setShowForm(true);
     };

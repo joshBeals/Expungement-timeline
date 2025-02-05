@@ -4,21 +4,14 @@ import { useAppState } from "../store/AppStateContext";
 import { Badge, Button, Modal } from "react-bootstrap";
 
 // Define a set of distinct colors
-const colors = [
-    "#A7C7E7", // Soft Sky Blue
-    "#E6B8A2", // Warm Sand Beige
-    "#D6E4AA", // Light Olive Green
-    "#FFD3B6", // Peach Beige
-    "#CABBE9", // Lavender Mist
-    "#B5E2B3", // Light Sage Green
-    "#F0D9FF", // Pastel Lilac
-    "#D3D3D3", // Cool Silver Gray
-    "#C1D3FE", // Soft Periwinkle Blue
-];
-  
+const colors = {
+    "conviction": "#E0A899",
+    "felony": "#85B597",
+    "misdemeanor": "#5B82B1",
+};
 
 function EventCard({ event, years, onResize, row, action }) {
-    const { id, startYear, endYear } = event;
+    const { id, startYear, endYear, name } = event;
     const [isResizing, setIsResizing] = useState(false);
 
     const [show, setShow] = useState(false);
@@ -32,7 +25,7 @@ function EventCard({ event, years, onResize, row, action }) {
     const span = endYear - startYear + 1;
 
     // Assign a unique color based on the event's ID (or cycle through colors)
-    const cardColor = colors[id % colors.length];
+    const cardColor = endYear ? colors[name?.toLowerCase()] : "#A4A4A4";
 
     const [{ isDragging }, dragRef] = useDrag({
         type: "event",
@@ -89,8 +82,9 @@ function EventCard({ event, years, onResize, row, action }) {
                 style={{
                     gridColumn: `${startIndex} / span ${span}`,
                     gridRow: row,
+                    // color: "white",
                     backgroundColor: cardColor, // Set unique background color
-                    opacity: isDragging || isResizing ? 0.8 : 1,
+                    opacity: isDragging || isResizing ? 0.5 : 1,
                     zIndex: isDragging || isResizing ? 3 : 1,
                 }}
             >
