@@ -7,9 +7,11 @@ import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import { useAppState } from '../store/AppStateContext';
 import ScenarioForm from '../components/ScenarioForm';
+import generateAlloyPredicate from '../helpers/generateAlloy';
+import Connections from '../components/Connections';
 
 function Main() {
-    const { showForm, setShowForm } = useAppState();
+    const { showForm, setShowForm, allscenarios, connections } = useAppState();
     const [selectedScenario, setSelectedScenario] = useState(null);  // New state to track editing scenario
 
     const handleClose = () => {
@@ -22,6 +24,17 @@ function Main() {
         setSelectedScenario(scenario);
         setShowForm(true);
     };
+
+    const checkResult = () => {
+        const sortedScenarios = allscenarios.sort((a, b) => {
+            if (a.endYear === null) return 1;
+            if (b.endYear === null) return -1;
+            return a.startYear - b.startYear;
+        });
+        console.log(sortedScenarios);
+        const result = generateAlloyPredicate(sortedScenarios, connections);
+        console.log(result);
+    }
 
     return (
         <DndProvider backend={HTML5Backend}>
@@ -39,11 +52,17 @@ function Main() {
                     <Button variant="primary" onClick={() => handleShow()}>
                         Add Conviction
                     </Button>
+
+                    <Button variant="primary" onClick={checkResult}>
+                        Check Result
+                    </Button>
                 </p>
             </Alert>
 
             {/* Timeline Section */}
             <Timeline onEditScenario={handleShow} /> {/* Pass the function to Timeline */}
+
+            <Connections />
 
             {/* Offcanvas Section */}
             <Offcanvas show={showForm} onHide={handleClose} placement="end">

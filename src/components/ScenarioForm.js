@@ -51,6 +51,12 @@ const ScenarioForm = ({ scenario = null }) => {
         setEndYear(value);
     };
 
+    function determineYearType(startYear, endYear) {
+        if (!endYear || endYear === "") return "unspecified";
+        if (startYear === endYear) return "single";
+        return "range";
+    }
+
     const handleSubmit = () => {
         let error = false;
         let errorMessage = '';
@@ -71,8 +77,8 @@ const ScenarioForm = ({ scenario = null }) => {
 
         const newScenario = {
             id: scenario?.id || Date.now(),
-            type: convictionType,
-            yearType,
+            type: convictionType || "Conviction",
+            yearType: determineYearType(startYear, endYear),
             startYear: yearType ? startYear : '',
             endYear: yearType ? endYear : '',
             assaultive: isChecked,

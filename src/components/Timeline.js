@@ -34,7 +34,7 @@ function Timeline({ onEditScenario }) {
       mappedEvents.sort((a, b) => {
         if (a.endYear === null) return 1;  // Move a to the bottom
         if (b.endYear === null) return -1; // Move b to the bottom
-        return a.endYear - b.endYear; // Sort by ascending endYear
+        return a.startYear - b.startYear; // Sort by ascending endYear
       });
   
       setEvents(mappedEvents);
@@ -148,7 +148,7 @@ function Timeline({ onEditScenario }) {
             <React.Fragment key={event.id}>
               <div
                 className={`label-${event.id} grid-row-label`}
-                style={{ gridRow: index + 2, gridColumn: "1" }}
+                style={{ gridRow: index + 2, gridColumn: "1", cursor: "pointer" }}
                 onClick={() => handleEventClick(event)}
               >
                 <div>{event.name}</div>
@@ -166,19 +166,6 @@ function Timeline({ onEditScenario }) {
             </React.Fragment>
           ))}
         </div>
-
-        {connections.map(({ fromId, toId }, index) => (
-              <LineTo
-                  key={index}
-                  from={`label-${fromId}`}
-                  to={`label-${toId}`}
-                  borderColor="black"
-                  borderWidth={2}
-                  borderStyle="solid"
-                  path="arc"
-                  delay={0}
-              />
-          ))}
       </div>
     </div>
   );
