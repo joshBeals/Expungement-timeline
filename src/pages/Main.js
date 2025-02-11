@@ -9,10 +9,13 @@ import { useAppState } from '../store/AppStateContext';
 import ScenarioForm from '../components/ScenarioForm';
 import generateAlloyPredicate from '../helpers/generateAlloy';
 import Connections from '../components/Connections';
+import { useNavigate } from 'react-router-dom';
 
 function Main() {
     const { showForm, setShowForm, allscenarios, connections } = useAppState();
     const [selectedScenario, setSelectedScenario] = useState(null);  // New state to track editing scenario
+
+    const navigate = useNavigate();
 
     const handleClose = () => {
         setShowForm(false);
@@ -26,14 +29,7 @@ function Main() {
     };
 
     const checkResult = () => {
-        const sortedScenarios = allscenarios.sort((a, b) => {
-            if (a.endYear === null) return 1;
-            if (b.endYear === null) return -1;
-            return a.startYear - b.startYear;
-        });
-        console.log(sortedScenarios);
-        const result = generateAlloyPredicate(sortedScenarios, connections);
-        console.log(result);
+        navigate("/result");
     }
 
     return (

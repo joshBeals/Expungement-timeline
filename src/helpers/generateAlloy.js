@@ -1,3 +1,9 @@
+/**
+ * Joshua Alele-Beals
+ * joshbeals22@gmail.com
+ * github.com/joshBeals
+ */
+
 import determineTemporalRelation from "./determineTemporalRelation";
 
 function generateAlloyPredicate(data, connections) {
@@ -60,6 +66,8 @@ function generateAlloyPredicate(data, connections) {
             const currentConviction = data[index];
 
             if (prevConviction.yearType !== "unspecified" && currentConviction.yearType !== "unspecified") {
+                console.log(prevConviction);
+                console.log(currentConviction);
                 let relations = determineTemporalRelation(prevConviction, currentConviction);
 
                 if (Array.isArray(relations)) {

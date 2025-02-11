@@ -1,4 +1,10 @@
 
+/**
+ * Joshua Alele-Beals
+ * joshbeals22@gmail.com
+ * github.com/joshBeals
+ */
+
 // Function to determine the correct temporal relation
 function determineTemporalRelation(A, B) {
     if (A.yearType === "single" && B.yearType === "single") {
