@@ -48,15 +48,15 @@ function Main() {
                     applies in various situations.
                 </p>
                 <hr />
-                <p className="mb-0">
-                    <Button variant="primary" onClick={() => handleShow()}>
+                <div className="d-flex justify-content-between w-100">
+                    <Button variant="outline-primary" onClick={() => handleShow()}>
                         Add Conviction
                     </Button>
 
-                    <Button variant="primary" onClick={checkResult}>
+                    <Button variant="outline-primary" onClick={checkResult}>
                         Check Result
                     </Button>
-                </p>
+                </div>
             </Alert>
 
             {/* Timeline Section */}

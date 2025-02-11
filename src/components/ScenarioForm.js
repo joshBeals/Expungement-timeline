@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import generateYearRange from '../helpers/generateYearRange';
 import { useAppState } from '../store/AppStateContext';
+import determineYearType from '../helpers/determineYearType';
 
 const ScenarioForm = ({ scenario = null }) => {
     console.log(scenario);
@@ -50,12 +51,6 @@ const ScenarioForm = ({ scenario = null }) => {
         setStartYear(value);
         setEndYear(value);
     };
-
-    function determineYearType(startYear, endYear) {
-        if (!endYear || endYear === "") return "unspecified";
-        if (startYear === endYear) return "single";
-        return "range";
-    }
 
     const handleSubmit = () => {
         let error = false;

@@ -7,7 +7,7 @@ import { Badge, Button, Modal } from "react-bootstrap";
 const colors = {
     "conviction": "#E0A899",
     "felony": "#85B597",
-    "misdemeanor": "#5B82B1",
+    "misdemeanor": "#7276b3",
 };
 
 function EventCard({ event, years, onResize, row, action }) {
@@ -25,7 +25,7 @@ function EventCard({ event, years, onResize, row, action }) {
     const span = endYear - startYear + 1;
 
     // Assign a unique color based on the event's ID (or cycle through colors)
-    const cardColor = endYear ? colors[name?.toLowerCase()] : "#A4A4A4";
+    const cardColor = endYear ? colors[name?.toLowerCase()] : "#d4d7e3";
 
     const [{ isDragging }, dragRef] = useDrag({
         type: "event",
@@ -82,7 +82,7 @@ function EventCard({ event, years, onResize, row, action }) {
                 style={{
                     gridColumn: `${startIndex} / span ${span}`,
                     gridRow: row,
-                    // color: "white",
+                    color: "white",
                     backgroundColor: cardColor, // Set unique background color
                     opacity: isDragging || isResizing ? 0.5 : 1,
                     zIndex: isDragging || isResizing ? 3 : 1,
