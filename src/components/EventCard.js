@@ -5,8 +5,8 @@ import { Badge, Button, Modal } from "react-bootstrap";
 
 // Define a set of distinct colors
 const colors = {
-    "conviction": "#E0A899",
-    "felony": "#85B597",
+    "conviction": "#9c28ea",
+    "felony": "#E0A899",
     "misdemeanor": "#7276b3",
 };
 

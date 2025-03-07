@@ -5,6 +5,8 @@ import Timeline from '../components/Timeline';
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas';
+import Modal from 'react-bootstrap/Modal';
+import Form from 'react-bootstrap/Form';
 import { useAppState } from '../store/AppStateContext';
 import ScenarioForm from '../components/ScenarioForm';
 import generateAlloyPredicate from '../helpers/generateAlloy';
@@ -12,8 +14,9 @@ import Connections from '../components/Connections';
 import { useNavigate } from 'react-router-dom';
 
 function Main() {
-    const { showForm, setShowForm, allscenarios, connections } = useAppState();
+    const { showForm, setShowForm, allscenarios, connections, interpretation, setInterpretation } = useAppState();
     const [selectedScenario, setSelectedScenario] = useState(null);  // New state to track editing scenario
+    const [showModal, setShowModal] = useState(false);
 
     const navigate = useNavigate();
 
@@ -28,9 +31,14 @@ function Main() {
         setShowForm(true);
     };
 
-    const checkResult = () => {
-        navigate("/result");
-    }
+    const handleCheckResult = () => {
+        setShowModal(true); // Show the modal when the button is clicked
+    };
+
+    const handleConfirm = () => {
+        setShowModal(false);
+        navigate("/result"); // Navigate after selection
+    };
 
     return (
         <DndProvider backend={HTML5Backend}>
@@ -49,7 +57,7 @@ function Main() {
                         Add Conviction
                     </Button>
 
-                    <Button variant="outline-primary" onClick={checkResult}>
+                    <Button variant="outline-primary" onClick={handleCheckResult}>
                         Check Result
                     </Button>
                 </div>
@@ -69,6 +77,35 @@ function Main() {
                     <ScenarioForm scenario={selectedScenario} />
                 </Offcanvas.Body>  
             </Offcanvas>  
+
+            {/* Modal for Interpretation Selection */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Select Interpretation Type</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>Choose an interpretation method:</Form.Label>
+                            <Form.Select 
+                                value={interpretation} 
+                                onChange={(e) => setInterpretation(e.target.value)}
+                            >
+                                <option value="forward">Forward</option>
+                                <option value="backward">Backward</option>
+                            </Form.Select>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" onClick={() => setShowModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleConfirm}>
+                        Confirm & Proceed
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </DndProvider>
     );
 }

@@ -23,7 +23,7 @@ export const AppStateProvider = ({ children }) => {
     });
 
     const [showResult, setShowResult] = useState(false);
-    const [interpretation, setInterpretation] = useState('');
+    const [interpretation, setInterpretation] = useState('forward');
 
     /** ✅ Save scenarios and connections to `localStorage` */
     useEffect(() => {

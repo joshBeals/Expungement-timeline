@@ -146,6 +146,7 @@ function Timeline({ onEditScenario }) {
     if (updatedScenario) {
       editScenario({
         ...updatedScenario,
+        yearType: determineYearType(newStart.toString(), newEnd.toString()),
         startYear: newStart.toString(),
         endYear: newEnd.toString(),
       });
@@ -160,6 +161,7 @@ function Timeline({ onEditScenario }) {
           const duration = event.endYear - event.startYear;
           return {
             ...event,
+            yearType: determineYearType(newStartYear, newStartYear + duration),
             startYear: newStartYear,
             endYear: newStartYear + duration,
           };
