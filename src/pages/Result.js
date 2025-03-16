@@ -64,13 +64,12 @@ const Result = () => {
             {result ? (
                 <>
                 <Alert variant="primary" className='m-3'>
-                    <Alert.Heading>Expungement Analyser</Alert.Heading>
+                    <Alert.Heading>Expungement Analysis Complete</Alert.Heading>
                     <p className='mt-3'>
-                        Welcome to the Expungement Analyser. This interactive tool allows you to 
-                        explore different conviction scenarios and determine their expungement eligibility. 
-                        Add a conviction to the timeline, adjust its details, and analyze how the law 
-                        applies in various situations.
-                        </p>
+                        The analysis is complete! Below, you will find a detailed assessment of the expungement eligibility 
+                        based on the provided conviction data. This result takes into account waiting periods, conviction types, and applicable legal restrictions 
+                        to determine which convictions qualify for expungement and which do not.
+                    </p>
                     <hr />
                     <Button variant="outline-primary" onClick={() => navigate("/")}>
                         Go Back

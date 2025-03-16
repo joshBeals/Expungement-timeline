@@ -4,7 +4,7 @@ import Modal from "react-bootstrap/Modal";
 
 // Define a set of distinct colors
 const colors = {
-    "conviction": "#9c28ea",
+    "conviction": "#398fa9",
     "felony": "#E0A899",
     "misdemeanor": "#7276b3",
 };

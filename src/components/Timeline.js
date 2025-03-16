@@ -4,18 +4,22 @@ import EventCard from "./EventCard";
 import "../styles/Timeline.css";
 import { useAppState } from "../store/AppStateContext";
 import { Bounce, ToastContainer, toast } from 'react-toastify';
-import { Button } from "react-bootstrap";
+import { Button, Modal, OverlayTrigger, Tooltip } from "react-bootstrap";
 import LineTo, { SteppedLineTo } from "react-lineto";
 import determineTemporalRelation from "../helpers/determineTemporalRelation";
 import determineYearType from "../helpers/determineYearType";
 
 function Timeline({ onEditScenario }) {
   const years = Array.from({ length: 20 }, (_, i) => 2005 + i); // Years from 2005-2025
-  const { allscenarios, addScenario, editScenario, connections, addConnection } = useAppState(); // Get allscenarios, addScenario and editScenario
+  const { allscenarios, addScenario, editScenario, connections, addConnection, removeConnection } = useAppState(); // Get allscenarios, addScenario and editScenario
   const [selectedEvent, setSelectedEvent] = useState(null); 
 
   // Initialize events from allscenarios
   const [events, setEvents] = useState([]);
+
+  // 🚀 Modal State for Conflict Handling
+  const [showModal, setShowModal] = useState(false);
+  const [modalData, setModalData] = useState(null);
 
   useEffect(() => {
     if (allscenarios && allscenarios.length > 0) {
@@ -43,6 +47,13 @@ function Timeline({ onEditScenario }) {
       setEvents(mappedEvents);
     }
   }, [allscenarios]); // Updates when allscenarios changes
+
+  useEffect(() => {
+    if (events.length > 0) {
+      revalidateConnections();
+    }
+  }, [events]); // Runs every time `events` change
+
 
   const showMessage = (message, type) => {
     let config = {
@@ -77,50 +88,63 @@ function Timeline({ onEditScenario }) {
 
   /** ✅ Handle clicking on an event to create a connection */
   const handleEventClick = (event) => {
-    console.log("🖱 Event Clicked:", event); // ✅ Debugging Log
+    console.log("🖱 Event Clicked:", event);
 
     if (!selectedEvent) {
-        setSelectedEvent(event); // First event selected
-        console.log("✅ Selected Event:", event.id);
+        setSelectedEvent(event);
         showMessage(`Selected #${event.id}`, "info");
     } else {
         if (selectedEvent.id !== event.id) {
-            const selectedYearType = determineYearType(selectedEvent.startYear, selectedEvent.endYear);
-            const eventYearType = determineYearType(event.startYear, event.endYear);
+            const selectedStart = selectedEvent.startYear;
+            const otherStart = event.startYear;
 
-            // 🔍 Check if connection already exists
-            const connectionExists = connections.some(
-                (conn) => (conn.fromId === (selectedEvent.id) && conn.toId === event.id) || (conn.fromId === (event.id) && conn.toId === selectedEvent.id)
-            );
-
-            if (connectionExists) {
-                console.log("⚠️ Connection Already Exists:", selectedEvent.id, "→", event.id);
-                showMessage("Connection Already Exists", "warning");
-            } else {
-                // 🔍 Check if connection is valid
-                const isValidConnection =
-                    selectedYearType === "unspecified" ||
-                    eventYearType === "unspecified" ||
-                    (selectedYearType === "range" && eventYearType === "range" && doRangesOverlap(selectedEvent, event)) ||
-                    (selectedYearType === "single" && eventYearType === "single" && selectedEvent.startYear <= event.startYear);
-
-                if (isValidConnection) {
-                  console.log("🔗 Creating connection:", selectedEvent.id, "→", event.id);
-                  showMessage("Created connection!", "success");
-                  addConnection(selectedEvent.id, event.id); // ✅ Add valid connection
-                } else {
-                  if (selectedYearType === "range" && eventYearType === "range" && !doRangesOverlap(selectedEvent, event)) {
-                    console.log("⚠️ Order already implicitely defined:", selectedEvent.id, "→", event.id, );
-                    showMessage("Order already implicitely defined", "error");
-                  } else {
-                    console.log("❌ Invalid Connection:", selectedEvent.id, "→", event.id, " (Cannot happen before)");
-                    showMessage("Invalid Connection", "error");
-                  }
-                }
+            // 🚨 Conflict: The selected event starts earlier than the other event
+            if (selectedStart > otherStart) {
+                setModalData({ eventToAdjust: event, newStartYear: selectedStart, endYear: event.endYear, selectedEventId: selectedEvent.id });
+                setShowModal(true);
+                return; // Stop execution until the user confirms
             }
+
+            // If no adjustment is needed, create the connection immediately
+            createConnection(selectedEvent.id, event.id);
         }
-        setSelectedEvent(null); // Reset selection
+        setSelectedEvent(null);
     }
+  };
+
+  const createConnection = (fromId, toId) => {
+    const connectionExists = connections.some(
+        (conn) => (conn.fromId === fromId && conn.toId === toId) || 
+                  (conn.fromId === toId && conn.toId === fromId)
+    );
+
+    if (connectionExists) {
+        showMessage("Connection Already Exists", "warning");
+        return false;  // Connection was NOT added
+    } else {
+        addConnection(fromId, toId);
+        showMessage("Created connection!", "success");
+        return true;  // Connection was successfully added
+    }
+  };
+
+  const handleConfirmAdjustment = () => {
+    if (modalData) {
+        // ✅ Attempt to create the connection first
+        const connectionAdded = createConnection(modalData.selectedEventId, modalData.eventToAdjust.id);
+
+        // ✅ Only adjust the event start year if the connection was successfully added
+        if (connectionAdded) {
+            handleCardResize(modalData.eventToAdjust.id, modalData.newStartYear, modalData.endYear);
+            showMessage(`Adjusted start year to ${modalData.newStartYear}`, "success");
+        }
+    }
+    setShowModal(false);
+  };
+
+  const handleCancelAdjustment = () => {
+      setShowModal(false);
+      showMessage("Connection cancelled due to conflicting dates", "error");
   };
 
   /**
@@ -197,6 +221,33 @@ function Timeline({ onEditScenario }) {
     }),
   });
 
+  const revalidateConnections = () => {
+    const invalidConnections = connections.filter(({ fromId, toId }) => {
+        const fromEvent = events.find(e => e.id === fromId);
+        const toEvent = events.find(e => e.id === toId);
+
+        if (!fromEvent || !toEvent) return true; // If an event is missing, the connection is invalid
+
+        const fromYearType = determineYearType(fromEvent.startYear, fromEvent.endYear);
+        const toYearType = determineYearType(toEvent.startYear, toEvent.endYear);
+
+        // 🔍 Check if the connection is **invalid**
+        return !(
+            fromYearType === "unspecified" ||
+            toYearType === "unspecified" ||
+            (fromYearType === "range" && toYearType === "range" && doRangesOverlap(fromEvent, toEvent)) ||
+            (fromYearType === "single" && toYearType === "single" && fromEvent.startYear <= toEvent.startYear)
+        );
+    });
+
+    // 🔥 Remove invalid connections & show warnings
+    if (invalidConnections.length > 0) {
+        invalidConnections.forEach(({ fromId, toId }) => removeConnection(fromId, toId)); // ✅ Remove only invalid connections
+        showMessage("Some connections were removed due to invalid changes", "warning");
+    }
+  };
+
+
   return (
     <div className="container-fluid">
       <ToastContainer />
@@ -224,14 +275,26 @@ function Timeline({ onEditScenario }) {
           {/* Event Rows */}
           {events.map((event, index) => (
             <React.Fragment key={event.id}>
-              <div
-                className={`label-${event.id} grid-row-label`}
-                style={{ gridRow: index + 2, gridColumn: "1", cursor: "pointer" }}
-                onClick={() => handleEventClick(event)}
-              >
-                <div>{event.name}</div>
-                <code>#{event.id}</code>
-              </div>
+                <div
+                  className="grid-row-label"
+                  style={{ gridRow: index + 2, gridColumn: "1", cursor: "pointer" }}
+                  onClick={() => handleEventClick(event)}
+                >
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-${event.id}`}>
+                        {selectedEvent ? "Click to complete the connection." : "Click to start a connection."}
+                      </Tooltip>
+                    }
+                  >
+                    <span>
+                      <div>{event.name}</div>
+                      <code>#{event.id}</code>
+                    </span>
+                  </OverlayTrigger>
+                </div>
+
 
               <EventCard
                 event={event}
@@ -245,6 +308,29 @@ function Timeline({ onEditScenario }) {
           ))}
         </div>
       </div>
+
+      <Modal show={showModal} onHide={handleCancelAdjustment} >
+        <Modal.Header closeButton>
+            <Modal.Title>Adjust Event Start Year?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+            <p>
+                The selected event starts earlier than this event. To maintain a valid order,
+                the start year of this event should be adjusted to {modalData?.newStartYear}.
+                <br /><br />
+                Would you like to automatically adjust the start year?
+            </p>
+        </Modal.Body>
+        <Modal.Footer>
+            <Button variant="secondary" onClick={handleCancelAdjustment}>
+                Cancel
+            </Button>
+            <Button variant="primary" onClick={handleConfirmAdjustment}>
+                Yes, Adjust
+            </Button>
+        </Modal.Footer>
+      </Modal>
+
     </div>
   );
 }
